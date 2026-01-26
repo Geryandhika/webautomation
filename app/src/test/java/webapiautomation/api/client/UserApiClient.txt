@@ -1,0 +1,88 @@
+ package webapiautomation.api.client;
+
+import io.cucumber.java.en.*;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import org.assertj.core.api.Assertions;
+import org.json.JSONObject;
+import java.util.UUID;
+
+public class ApiStepDefinitions {
+
+    private Response lastResponse;
+    private String createdUserId;
+
+    @Given("valid DummyAPI app id header")
+    public void valid_dummyapi_app_id_header() {
+        // Header akan di-set di setiap request
+    }
+
+    @When("client sends GET user by id {string}")
+    public void client_sends_get_user_by_id(String id) {
+        lastResponse = RestAssured.given()
+                .baseUri("https://dummyapi.io/data/v1")
+                .header("app-id", "63a804408eb0cb069b57e43a")
+                .contentType("application/json")
+                .when()
+                .get("/user/" + id);
+    }
+
+    @Then("response status code should be {int}")
+    public void response_status_code_should_be(Integer statusCode) {
+        Assertions.assertThat(lastResponse.getStatusCode()).isEqualTo(statusCode);
+    }
+
+    @Then("response body should contain field {string} with value {string}")
+    public void response_body_should_contain_field_with_value(String field, String value) {
+        Assertions.assertThat(lastResponse.jsonPath().getString(field)).isEqualTo(value);
+    }
+
+    @When("client creates a new user")
+    public void client_creates_a_new_user() {
+        String randomEmail = "auto_" + UUID.randomUUID() + "@example.com";
+        JSONObject body = new JSONObject();
+        body.put("firstName", "Auto");
+        body.put("lastName", "User");
+        body.put("email", randomEmail);
+        
+        lastResponse = RestAssured.given()
+                .baseUri("https://dummyapi.io/data/v1")
+                .header("app-id", "63a804408eb0cb069b57e43a")
+                .contentType("application/json")
+                .body(body.toString())
+                .when()
+                .post("/user/create");
+        
+        createdUserId = lastResponse.jsonPath().getString("id");
+    }
+
+    @Then("response body should contain field {string}")
+    public void response_body_should_contain_field(String field) {
+        Assertions.assertThat(lastResponse.jsonPath().getString(field)).isNotBlank();
+    }
+
+    @When("client updates that user lastname to {string}")
+    public void client_updates_that_user_lastname_to(String newLastName) {
+        JSONObject body = new JSONObject();
+        body.put("lastName", newLastName);
+        
+        lastResponse = RestAssured.given()
+                5d1a
+                .baseUri("https://dummyapi.io/data/v1")
+                .header("app-id", "63a804408eb0cb069b57e43a")
+                .contentType("application/json")
+                .body(body.toString())
+                .when()
+                .put("/user/" + createdUserId);
+    }
+
+    @When("client deletes that user")
+    public void client_deletes_that_user() {
+        lastResponse = RestAssured.given()
+                .baseUri("https://dummyapi.io/data/v1")
+                .header("app-id", "63a804408eb0cb069b57e43a")
+                .contentType("application/json")
+                .when()
+                .delete("/user/" + createdUserId);
+    }
+}
