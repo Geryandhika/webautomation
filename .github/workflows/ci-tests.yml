@@ -1,44 +1,35 @@
-name: Web & API Cucumber Tests
+name: CI Tests (Windows/Linux)
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
-      - master
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-
+  web-tests:
+    runs-on: ubuntu-latest # bisa juga windows-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Build project
+        run: ./gradlew clean build
 
-      - name: Run API tests
-        run: ./gradlew apiTest
-
-      - name: Run Web tests (headless)
-        env:
-          # bisa gunakan variable tambahan jika ingin headless via arg di driver
-          CI: true
+      - name: Run Web Tests
         run: ./gradlew webTest
 
-      - name: Upload Cucumber reports
-        uses: actions/upload-artifact@v4
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
         with:
-          name: cucumber-reports
-          path: |
-            app/build/reports/cucumber-api.html
-            app/build/reports/cucumber-api.json
-            app/build/reports/cucumber-web.html
-            app/build/reports/cucumber-web.json
+          name: test-results
+          path: app/build/test-results
