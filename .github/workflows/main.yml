@@ -1,0 +1,47 @@
+name: Automation Test CI (API & UI Web)
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  automation-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # 2. Setup Java (sesuai project)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # 3. Grant permission for Gradle wrapper
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 4. Setup Google Chrome (UNTUK UI TEST)
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
+
+      # 5. Run Automation Tests (API + UI)
+      - name: Run Automation Tests
+        run: ./gradlew :app:test
+
+      # 6. Upload Test Report (WAJIB, WALAU FAIL)
+      - name: Upload Test Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-test-report
+          path: |
+            app/build/reports/tests
+            app/build/reports
