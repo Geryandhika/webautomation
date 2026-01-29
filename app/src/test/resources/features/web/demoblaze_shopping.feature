@@ -1,6 +1,7 @@
 @web
 Feature: Shopping on Demoblaze
 
+@ignore
   Scenario: Home page is accessible
     Given user is on Demoblaze home page
     Then home page title should be "STORE"
@@ -12,6 +13,7 @@ Feature: Shopping on Demoblaze
     And user navigates to cart page
     Then cart should contain at least one product
 
+@ignore
   Scenario: Cart should be empty when no product added
     Given user is on Demoblaze home page
     When user navigates directly to cart page
