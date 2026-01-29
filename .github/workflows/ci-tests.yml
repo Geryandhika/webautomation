@@ -1,35 +1,45 @@
-name: CI Tests (Windows/Linux)
+name: Automation Test CI (API & Web UI)
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
-  web-tests:
-    runs-on: ubuntu-latest # bisa juga windows-latest
+  automation-test:
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # 1. Checkout repository
+      - name: Checkout source code
+        uses: actions/checkout@v4
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      # 2. Setup Java (sesuai project webautomation)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          java-version: '17'
           distribution: 'temurin'
+          java-version: '17'
 
-      - name: Build project
-        run: ./gradlew clean build
+      # 3. Grant permission for Gradle Wrapper
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Run Web Tests
-        run: ./gradlew webTest
+      # 4. Setup Google Chrome (untuk Selenium UI Test)
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v1
 
-      - name: Upload test results
+      # 5. Run Automation Tests (API + UI)
+      - name: Run Gradle Test
+        run: ./gradlew clean test
+
+      # 6. Upload Test Report
+      - name: Upload Test Report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: app/build/test-results
+          name: automation-test-report
+          path: |
+            build/reports/tests
+            build/reports
