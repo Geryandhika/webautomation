@@ -1,10 +1,12 @@
-name: Automation Test CI (API & Web UI)
+name: Automation Test CI (API & UI Web)
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   automation-test:
@@ -15,31 +17,31 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # 2. Setup Java (sesuai project webautomation)
+      # 2. Setup Java (sesuai project)
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      # 3. Grant permission for Gradle Wrapper
+      # 3. Grant permission for Gradle wrapper
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 4. Setup Google Chrome (untuk Selenium UI Test)
+      # 4. Setup Google Chrome (UNTUK UI TEST)
       - name: Setup Chrome
         uses: browser-actions/setup-chrome@v1
 
       # 5. Run Automation Tests (API + UI)
-      - name: Run Gradle Test
-        run: ./gradlew clean test
+      - name: Run Automation Tests
+        run: ./gradlew :app:test
 
-      # 6. Upload Test Report
+      # 6. Upload Test Report (WAJIB, WALAU FAIL)
       - name: Upload Test Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: automation-test-report
           path: |
-            build/reports/tests
-            build/reports
+            app/build/reports/tests
+            app/build/reports
